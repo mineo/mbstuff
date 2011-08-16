@@ -144,8 +144,12 @@ def main():
     if len(tracks2isrcs) == 0:
         print "No new ISRCs could be found."
     else:
-
+        vals = tracks2isrcs.values()
         for key, val in tracks2isrcs.items():
+            if vals().count(val) > 1:
+                "The ISRC %s appears multiple times, I'm not going to submit it"\
+                % val
+                tracks2isrcs.pop(key)
             print "The ISRC %s will be attached to %s" % (val, key)
             if raw_input("Is this correct? [y/N]").lower() != "y":
                 tracks2isrcs.pop(key)
