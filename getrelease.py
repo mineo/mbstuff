@@ -7,13 +7,7 @@ Usage:
 """
 
 import sys
-import logging
 import musicbrainz2.webservice as ws
-
-logging.basicConfig()
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-
 
 if len(sys.argv) < 2:
     sys.exit(__doc__)
