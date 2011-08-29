@@ -150,6 +150,7 @@ def main():
                 "The ISRC %s appears multiple times, I'm not going to submit it"\
                 % val
                 tracks2isrcs.pop(key)
+                continue
             print "The ISRC %s will be attached to %s" % (val, key)
             if raw_input("Is this correct? [y/N]").lower() != "y":
                 tracks2isrcs.pop(key)
