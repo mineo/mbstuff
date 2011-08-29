@@ -147,7 +147,7 @@ def main():
         vals = tracks2isrcs.values()
         for key, val in tracks2isrcs.items():
             if vals.count(val) > 1:
-                "The ISRC %s appears multiple times, I'm not going to submit it"\
+                print "The ISRC %s appears multiple times, I'm not going to submit it"\
                 % val
                 tracks2isrcs.pop(key)
                 continue
