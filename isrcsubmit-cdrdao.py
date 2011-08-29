@@ -146,7 +146,7 @@ def main():
     else:
         vals = tracks2isrcs.values()
         for key, val in tracks2isrcs.items():
-            if vals().count(val) > 1:
+            if vals.count(val) > 1:
                 "The ISRC %s appears multiple times, I'm not going to submit it"\
                 % val
                 tracks2isrcs.pop(key)
@@ -154,7 +154,7 @@ def main():
             if raw_input("Is this correct? [y/N]").lower() != "y":
                 tracks2isrcs.pop(key)
 
-        if len(tracks2isrcs.keys() > 0):
+        if len(tracks2isrcs.keys()) > 0:
             try:
                 q.submitISRCs(tracks2isrcs)
                 print "Successfully submitted", len(tracks2isrcs), "ISRCs."
