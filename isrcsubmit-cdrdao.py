@@ -74,7 +74,8 @@ def main():
     except DiscError, e:
         exit("DiscID calculation failed: %s" % e)
 
-    ws = WebService(username=args.user, password=password)
+    ws = WebService(username=args.user, password=password,
+                    userAgent="isrcsubmit_cdrao")
     q = Query(ws)
 
     filter = ReleaseFilter(discId=disc.id)
@@ -113,7 +114,8 @@ def main():
     except WebServiceError, e:
         print "Couldn't fetch release:", str(e)
         exit(1)
-    print 'Artist:\t\t', release.getArtist().getName()
+
+    print '\nArtist:\t\t', release.getArtist().getName()
     print 'Release:\t', release.getTitle()
     tracks = release.getTracks()
 
@@ -145,24 +147,26 @@ def main():
         print "No new ISRCs could be found."
     else:
         vals = tracks2isrcs.values()
-        for key, val in tracks2isrcs.items():
+        print "\nISRC         | Recording"
+        print "-" * 13 + "+" + "-" * 66
+        for key, val in sorted(tracks2isrcs.items(), key=lambda keyval: keyval[1]):
             if vals.count(val) > 1:
                 print "The ISRC %s appears multiple times, I'm not going to submit it"\
                 % val
                 tracks2isrcs.pop(key)
                 continue
-            print "The ISRC %s will be attached to %s" % (val, key)
-            if raw_input("Is this correct? [y/N]").lower() != "y":
-                tracks2isrcs.pop(key)
 
-        if len(tracks2isrcs.keys()) > 0:
-            try:
-                q.submitISRCs(tracks2isrcs)
-                print "Successfully submitted", len(tracks2isrcs), "ISRCs."
-            except WebServiceError, e:
-                print "Couldn't send ISRCs:", str(e)
-        else:
-            print "Nothing was submitted to the server."
+            print "%s | %s" % (val, key)
+
+        if raw_input("Is this correct? [y/N]").lower() == "y":
+            if len(tracks2isrcs.keys()) > 0:
+                try:
+                    q.submitISRCs(tracks2isrcs)
+                    print "Successfully submitted", len(tracks2isrcs), "ISRCs."
+                except WebServiceError, e:
+                    print "Couldn't send ISRCs:", str(e)
+            else:
+                print "Nothing was submitted to the server."
     remove(filename)
 
 
