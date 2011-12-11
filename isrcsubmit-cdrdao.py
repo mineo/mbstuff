@@ -74,8 +74,12 @@ def main():
     except DiscError, e:
         exit("DiscID calculation failed: %s" % e)
 
-    ws = WebService(username=args.user, password=password,
-                    userAgent="isrcsubmit_cdrao")
+    try:
+        ws = WebService(username=args.user, password=password,
+                        userAgent="isrcsubmit_cdrao")
+    except TypeError:
+        ws = WebService(username=args.user, password=password)
+
     q = Query(ws)
 
     filter = ReleaseFilter(discId=disc.id)
