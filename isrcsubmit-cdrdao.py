@@ -24,6 +24,7 @@ import subprocess
 from musicbrainz2.disc import readDisc, DiscError, getSubmissionUrl
 from musicbrainz2.webservice import WebService, Query, ReleaseFilter
 from musicbrainz2.webservice import WebServiceError, ReleaseIncludes
+from musicbrainz2 import __version__ as musicbrainz_version
 from datetime import datetime
 from os import remove
 from sys import version_info
@@ -37,9 +38,18 @@ Example:
     CD2: 26 tracks
 If you want to submit ISRCs for CD2, you'll have to specify an offset of 25"""
 
+_old_version_warning = \
+"""WARNING: You are using an old version of python-musicbrainz2 and may
+experience problems fetching data from MusicBrainz. You are STRONGLY advised to
+update to a newer version.  Please read http://blog.musicbrainz.org/?p=1194 to
+find out why."""
+
 def main():
-    print """ATTENTION: Please read the help (-h) if you want to submit ISRCs for a
+    print """WARNING: Please read the help (-h) if you want to submit ISRCs for a
     release with multiple discs"""
+    musicbrainz_version_minor = int(musicbrainz_version.split(".")[2])
+    if musicbrainz_version_minor < 4:
+        print _old_version_warning
     if version_info >= (2,7):
         import argparse
         parser = argparse.ArgumentParser()
