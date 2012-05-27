@@ -89,14 +89,14 @@ class CueSheetBase(File):
                 k = self._rem_translate[k]
             else:
                 k = self._translate[k]
-            metadata.add(unicode(k), unicode(v.strip('"')))
+            metadata.add(k, v.strip('"'))
         except KeyError:
             pass
 
     def metadata_to_kv(self):
         for key, value in self.metadata.iteritems():
             if key in self._rtranslate:
-                yield '%s "%s"' % (self._rtranslate[key], value)
+                yield '%s "%s"'.encode("utf-8") % (self._rtranslate[key], value)
 
 
 class CueSheetTrack(CueSheetBase):
@@ -170,8 +170,9 @@ class CueSheet(CueSheetBase):
         temp_lines = {}
         current_track = None
 
-        with open(filename, "r") as cuesheet:
+        with open(filename, "rb") as cuesheet:
             for line in cuesheet:
+                line = line.decode("utf-8")
                 splitline = line.split()
                 key = splitline[0]
                 value = " ".join(splitline[1:]).strip()
@@ -223,31 +224,36 @@ class CueSheet(CueSheetBase):
         if os.path.exists(old_filename):
             self.log.debug("Moving file %r => %r", old_filename, new_filename)
             shutil.move(encode_filename(old_filename), encode_filename(new_filename))
+        if os.path.exists(old_audiofile):
             self.log.debug("Moving file %r => %r", old_audiofile, new_audiofile)
             shutil.move(encode_filename(old_audiofile), encode_filename(new_audiofile))
-        else:
-            # The file was most likely already moved
-            pass
-
         return new_filename
 
     def _save(self, filename, metadata, settings):
         with open(self.filename + "", "w") as cuesheet:
-            cuesheet.write('PERFORMER "%s"\n' %
-                (self.tracks[0].metadata.get("albumartist")))
-            cuesheet.write('TITLE "%s"\n' %
-                (self.tracks[0].metadata.get("album")))
-            cuesheet.write('FILE %s\n' % self.fileline)
+            _write = partial(writeline, cuesheet)
+            _write('PERFORMER "%s"' %
+                    (self.tracks[0].metadata.get("albumartist")))
+            _write('TITLE "%s"' %
+                    (self.tracks[0].metadata.get("album")))
+            _write('FILE "%s"' % self.fileline)
             self.tracks.sort(key=lambda track: track.tracknumber)
             for track in self.tracks:
-                cuesheet.write("  TRACK %02i AUDIO\n" % track.tracknumber)
+                _write("TRACK %02i AUDIO" % track.tracknumber, 2)
                 for index, value in track.indexes.iteritems():
-                    cuesheet.write("    INDEX %s %s\n" % (index, value))
+                    _write("INDEX %s %s" % (index, value), 4)
                 for line in track.metadata_to_kv():
-                    cuesheet.write("    %s\n" % line)
+                    _write(line, 4)
 
     def _save_and_rename(self, old_filename, metadata, settings):
         self._save(old_filename, metadata, settings)
         return self._rename(self.filename, metadata, settings)
+
+def writeline(_file, line, indent=0):
+        _line = b" " * indent + line + b"\n"
+        print type(_line)
+        print repr(_line)
+        _line = _line.encode("utf-8")
+        _file.write(_line)
 
 register_format(CueSheet)
