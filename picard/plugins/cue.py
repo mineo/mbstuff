@@ -236,7 +236,7 @@ class CueSheet(CueSheetBase):
                     (self.tracks[0].metadata.get("albumartist")))
             _write('TITLE "%s"' %
                     (self.tracks[0].metadata.get("album")))
-            _write('FILE "%s"' % self.fileline)
+            _write('FILE %s' % self.fileline)
             self.tracks.sort(key=lambda track: track.tracknumber)
             for track in self.tracks:
                 _write("TRACK %02i AUDIO" % track.tracknumber, 2)
