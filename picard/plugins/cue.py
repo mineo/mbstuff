@@ -251,8 +251,6 @@ class CueSheet(CueSheetBase):
 
 def writeline(_file, line, indent=0):
         _line = b" " * indent + line + b"\n"
-        print type(_line)
-        print repr(_line)
         _line = _line.encode("utf-8")
         _file.write(_line)
 
