@@ -116,9 +116,9 @@ class CueSheetTrack(CueSheetBase):
         self.cueparent = parent
         self.parent = parent.parent
         self.indexes = {}
+        CueSheetBase.__init__(self, "%s #%s" % (filename, tracknumber))
         tracknumber = int(tracknumber.split()[0])
         self._tracknumber = tracknumber
-        CueSheetBase.__init__(self, "%s #%i" % (filename, self._tracknumber))
         self.move(parent.parent)
         if start_metadata is not None:
             self.metadata.copy(start_metadata)
