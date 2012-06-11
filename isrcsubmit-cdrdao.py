@@ -1,7 +1,6 @@
 #!/usr/bin/env python2
-# Copyright 2010 Johannes Dewender ( brainz at JonnyJD.net ) 
-# Copyright 2011 Wieland Hoffmann
-#
+# Copyright 2010 Johannes Dewender ( brainz at JonnyJD.net )
+# Copyright 2011 Wieland Hoffmann #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -19,7 +18,7 @@
 heavily inspired by http://kraehen.org/isrcsubmit.py
 """
 import getpass
-
+import optparse
 import subprocess
 
 import musicbrainzngs
@@ -29,25 +28,13 @@ from os import remove
 from sys import version_info
 
 def main():
-    if version_info >= (2,7):
-        import argparse
-        parser = argparse.ArgumentParser()
-        parser.add_argument("-u", "--user", type=str, help="Username")
-        parser.add_argument("-p", "--password", type=str, help="Password")
-        parser.add_argument("-d", "--device", type=str, default="/dev/sr0",
-                help="Device name (default is /dev/sr0)")
-        parser.add_argument("-o", "--offset", type=int, default=0)
+    parser = optparse.OptionParser()
+    parser.add_option("-u", "--user", type=str, help="Username")
+    parser.add_option("-p", "--password", type=str, help="Password")
+    parser.add_option("-d", "--device", type=str, default="/dev/sr0",
+            help="Device name (default is /dev/sr0)")
+    (args, options) = parser.parse_args()
 
-        args = parser.parse_args()
-    else:
-        import optparse
-        parser = optparse.OptionParser()
-        parser.add_option("-u", "--user", type=str, help="Username")
-        parser.add_option("-p", "--password", type=str, help="Password")
-        parser.add_option("-d", "--device", type=str, default="/dev/sr0",
-                help="Device name (default is /dev/sr0)")
-        parser.add_option("-o", "--offset", type=int, default=0)
-        (args, options) = parser.parse_args()
     if not args.user:
         exit("No username given")
 
