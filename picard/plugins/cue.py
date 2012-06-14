@@ -38,7 +38,6 @@ class CueSheetBase(File):
         "ENGINEER": "engineer",
         "PRODUCER": "producer",
         "DJMIXER": "djmixer",
-        # TODO tracknumber ?
         # TODO performer?
         # TODO comment"
         # TODO lyrics
@@ -122,6 +121,8 @@ class CueSheetTrack(CueSheetBase):
         self.move(parent.parent)
         if start_metadata is not None:
             self.metadata.copy(start_metadata)
+        self.metadata.add("tracknumber", str(tracknumber))
+
 
     def _load(self, lines):
         metadata = Metadata()
@@ -150,7 +151,7 @@ class CueSheetTrack(CueSheetBase):
         return self.cueparent._save_and_rename(*args)
 
     def supports_tag(self, name):
-        return name in self._rtranslate
+        return name in self._rtranslate or name == "tracknumber"
 
 
 class CueSheet(CueSheetBase):
