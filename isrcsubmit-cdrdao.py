@@ -111,7 +111,7 @@ def main():
                 isrc = sline[1][1:-2]
                 try:
                     if isrc not in tracks[tracknum]["recording"]["isrc-list"]:
-                        tracks2isrcs[tracks[tracknum]["recording"]["id"]] = isrc
+                        tracks2isrcs[tracks[tracknum]["recording"]["id"]] = [isrc]
                 except KeyError:
                     tracks2isrcs[tracks[tracknum]["recording"]["id"]] = [isrc]
 
