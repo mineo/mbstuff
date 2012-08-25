@@ -95,6 +95,8 @@ class CueSheetBase(File):
     def metadata_to_kv(self):
         for key, value in self.metadata.iteritems():
             if key in self._rtranslate:
+                if key == "album":
+                    continue
                 yield '%s "%s"'.encode("utf-8") % (self._rtranslate[key], value)
 
 
@@ -128,10 +130,8 @@ class CueSheetTrack(CueSheetBase):
         metadata = Metadata()
         metadata.copy(self.metadata)
 
-        del metadata["title"]
-        del metadata["artist"]
-
         metadata.add("album", self.metadata.get("title"))
+        del metadata["title"]
         for line in lines:
             splitline = line.split()
             # linetokv?
