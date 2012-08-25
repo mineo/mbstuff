@@ -228,6 +228,12 @@ class CueSheet(CueSheetBase):
         if os.path.exists(old_audiofile):
             self.log.debug("Moving file %r => %r", old_audiofile, new_audiofile)
             shutil.move(encode_filename(old_audiofile), encode_filename(new_audiofile))
+        # wavpack
+        wvc_filename = old_audiofile.replace(".wv", ".wvc")
+        if os.path.isfile(wvc_filename):
+            new_wvc_filename = new_audiofile.replace(".wv", ".wvc")
+            shutil.move(encode_filename(wvc_filename),
+                        encode_filename(new_wvc_filename))
         return new_filename
 
     def _save(self, filename, metadata, settings):
