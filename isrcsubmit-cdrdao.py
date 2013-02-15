@@ -31,7 +31,7 @@ def main():
     parser.add_option("-u", "--user", type=str, help="Username")
     parser.add_option("-p", "--password", type=str, help="Password")
     parser.add_option("-d", "--device", type=str, default=discid.DEFAULT_DEVICE,
-            help="Device name")
+            help="Device name, the default is %s" % discid.DEFAULT_DEVICE)
     (args, options) = parser.parse_args()
 
     if not args.user:
