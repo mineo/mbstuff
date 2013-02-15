@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 # Copyright 2010 Johannes Dewender ( brainz at JonnyJD.net )
-# Copyright 2011 Wieland Hoffmann #
+# Copyright 2011 Wieland Hoffmann
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -17,47 +17,21 @@
 
 heavily inspired by http://kraehen.org/isrcsubmit.py
 """
+import discid
 import getpass
+import musicbrainzngs
 import optparse
 import subprocess
 
-from musicbrainz2.disc import readDisc, DiscError, getSubmissionUrl
-from musicbrainz2.webservice import WebService, Query, ReleaseFilter
-from musicbrainz2.webservice import WebServiceError, ReleaseIncludes
-from musicbrainz2 import __version__ as musicbrainz_version
 from datetime import datetime
 from os import remove
-from sys import version_info
-
-_offset_help = \
-"""Offset to add to every track number
-This is useful for releases with multi-disc releases.
-Currently you'll only get one big release from the webservice.
-Example:
-    CD1: 25 tracks
-    CD2: 26 tracks
-If you want to submit ISRCs for CD2, you'll have to specify an offset of 25"""
-
-_old_version_warning = \
-"""WARNING: You are using an old version of python-musicbrainz2 and may
-experience problems fetching data from MusicBrainz. You are STRONGLY advised to
-update to a newer version.  Please read http://blog.musicbrainz.org/?p=1194 to
-find out why."""
-
+from sys import exit, version_info
 def main():
-    print """WARNING: Please read the help (-h) if you want to submit ISRCs for a
-    release with multiple discs"""
-    musicbrainz_version_minor = int(musicbrainz_version.split(".")[2])
-    if musicbrainz_version_minor < 4:
-        print _old_version_warning
-
     parser = optparse.OptionParser()
     parser.add_option("-u", "--user", type=str, help="Username")
     parser.add_option("-p", "--password", type=str, help="Password")
-    parser.add_option("-d", "--device", type=str, default="/dev/sr0",
-            help="Device name (default is /dev/sr0)")
-    parser.add_option("-o", "--offset", type=int, default=0,
-            help=_offset_help)
+    parser.add_option("-d", "--device", type=str, default=discid.DEFAULT_DEVICE,
+            help="Device name")
     (args, options) = parser.parse_args()
 
     if not args.user:
@@ -68,59 +42,54 @@ def main():
     else:
         password = args.password
 
-    try:
-        disc = readDisc(args.device)
-    except DiscError, e:
-        exit("DiscID calculation failed: %s" % e)
+    _id = None
+    submission_url = None
+    with discid.DiscId() as disc:
+        disc.read(args.device)
+        _id = disc.id
+        submission_url = disc.submission_url
 
-    try:
-        ws = WebService(username=args.user, password=password,
-                        userAgent="isrcsubmit_cdrao")
-    except TypeError:
-        ws = WebService(username=args.user, password=password)
+    if _id is None:
+        exit("No discid could be calculated")
 
-    q = Query(ws)
+    musicbrainzngs.auth(args.user, password)
+    musicbrainzngs.set_useragent("isrcsubmit-cdrdao", "0.1", "Mineo@Freenode")
 
-    filter = ReleaseFilter(discId=disc.id)
-
-    try:
-        results = q.getReleases(filter=filter)
-    except WebServiceError, e:
-        exit("An error occured while communicating with MusicBrainz: %s" % e)
+    results = musicbrainzngs.get_releases_by_discid(
+            _id, includes=["recordings", "isrcs",
+            "artist-credits"])["disc"]["release-list"]
 
     if len(results) == 0:
         print "The disc is not in the database"
-        print "Please submit it with: %s" % getSubmissionUrl(disc)
+        print "Please submit it with: %s" % submission_url
         exit(1)
     elif len(results) > 1:
         print "This Disc ID is ambiguous:"
-        for i in range(len(results)):
-            release = results[i].release
-            print str(i)+":", release.getArtist().getName(),
-            print "-", release.getTitle(),
-            print "(" + release.getTypes()[1].rpartition('#')[2] + ")"
-            print release.getId()
+        for i, release in enumerate(results):
+            print str(i)+":", release["artist-credit-phrase"]
+            print "-", release["title"]
+            print release["id"]
         num = -1
         while True:
             try:
                 num =  raw_input("Which one do you want? [0-%d] " % i)
-                result = results[int(num)]
+                release = results[int(num)]
             except (IndexError, ValueError):
                 continue
             break
     else:
-        result = results[0]
+        release = results[0]
 
-    include = ReleaseIncludes(artist=True, tracks=True, isrcs=True)
-    try:
-        release = q.getReleaseById(result.getRelease().getId(), include=include)
-    except WebServiceError, e:
-        print "Couldn't fetch release:", str(e)
-        exit(1)
+    print 'Artist: %s' % release["artist-credit-phrase"]
+    print 'Release: %s' % release["title"]
 
-    print '\nArtist:\t\t', release.getArtist().getName()
-    print 'Release:\t', release.getTitle()
-    tracks = release.getTracks()
+    real_medium = None
+    for medium in release["medium-list"]:
+        for mdisc in medium["disc-list"]:
+            print mdisc
+            if mdisc["id"] == _id:
+                real_medium = medium
+                break
 
     filename = "/tmp/cdrdao-%s.toc" % datetime.now()
     try:
@@ -133,6 +102,7 @@ def main():
     if proc.returncode != 0:
         exit("cdrdao returned with return code %i" % proc.returncode)
 
+    tracks = real_medium["track-list"]
     tracks2isrcs = dict()
     tracknum = 0
 
@@ -140,11 +110,14 @@ def main():
         for line in tocfile:
             sline = line.split(" ")
             if sline[0] == "//":
-                tracknum = int(sline[2]) - 1 + args.offset
+                tracknum = int(sline[2]) - 1
             elif sline[0] == "ISRC":
                 isrc = sline[1][1:-2]
-                if isrc not in (tracks[tracknum].getISRCs()):
-                    tracks2isrcs[tracks[tracknum].getId()] = isrc
+                try:
+                    if isrc not in tracks[tracknum]["recording"]["isrc-list"]:
+                        tracks2isrcs[tracks[tracknum]["recording"]["id"]] = [isrc]
+                except KeyError:
+                    tracks2isrcs[tracks[tracknum]["recording"]["id"]] = [isrc]
 
     if len(tracks2isrcs) == 0:
         print "No new ISRCs could be found."
@@ -164,9 +137,9 @@ def main():
         if raw_input("Is this correct? [y/N]").lower() == "y":
             if len(tracks2isrcs.keys()) > 0:
                 try:
-                    q.submitISRCs(tracks2isrcs)
+                    musicbrainzngs.submit_isrcs(tracks2isrcs)
                     print "Successfully submitted", len(tracks2isrcs), "ISRCs."
-                except WebServiceError, e:
+                except musicbrainzngs.WebServiceError, e:
                     print "Couldn't send ISRCs:", str(e)
             else:
                 print "Nothing was submitted to the server."
