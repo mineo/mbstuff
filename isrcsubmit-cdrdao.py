@@ -19,7 +19,6 @@ heavily inspired by http://kraehen.org/isrcsubmit.py
 """
 import discid
 import getpass
-<<<<<<< HEAD
 import musicbrainzngs
 import optparse
 import subprocess
