@@ -17,22 +17,22 @@
 
 heavily inspired by http://kraehen.org/isrcsubmit.py
 """
+import discid
 import getpass
+import musicbrainzngs
 import optparse
 import subprocess
 
-import musicbrainzngs
-from musicbrainz2.disc import readDisc, DiscError
 from datetime import datetime
 from os import remove
-from sys import version_info
+from sys import exit, version_info
 
 def main():
     parser = optparse.OptionParser()
     parser.add_option("-u", "--user", type=str, help="Username")
     parser.add_option("-p", "--password", type=str, help="Password")
-    parser.add_option("-d", "--device", type=str, default="/dev/sr0",
-            help="Device name (default is /dev/sr0)")
+    parser.add_option("-d", "--device", type=str, default=discid.DEFAULT_DEVICE,
+            help="Device name")
     (args, options) = parser.parse_args()
 
     if not args.user:
@@ -43,21 +43,26 @@ def main():
     else:
         password = args.password
 
-    try:
-        disc = readDisc(args.device)
-    except DiscError, e:
-        exit("DiscID calculation failed: %s" % e)
+    _id = None
+    submission_url = None
+    with discid.DiscId() as disc:
+        disc.read(args.device)
+        _id = disc.id
+        submission_url = disc.submission_url
+
+    if _id is None:
+        exit("No discid could be calculated")
 
     musicbrainzngs.auth(args.user, password)
     musicbrainzngs.set_useragent("isrcsubmit-cdrdao", "0.1", "Mineo@Freenode")
 
     results = musicbrainzngs.get_releases_by_discid(
-            disc.id, includes=["recordings", "isrcs",
+            _id, includes=["recordings", "isrcs",
             "artist-credits"])["disc"]["release-list"]
 
     if len(results) == 0:
         print "The disc is not in the database"
-        #print "Please submit it with: %s" % getSubmissionUrl(disc)
+        print "Please submit it with: %s" % submission_url
         exit(1)
     elif len(results) > 1:
         print "This Disc ID is ambiguous:"
@@ -83,7 +88,7 @@ def main():
     for medium in release["medium-list"]:
         for mdisc in medium["disc-list"]:
             print mdisc
-            if mdisc["id"] == disc.id:
+            if mdisc["id"] == _id:
                 real_medium = medium
                 break
 
