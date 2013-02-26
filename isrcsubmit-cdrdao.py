@@ -53,7 +53,7 @@ def main():
         exit("No discid could be calculated")
 
     musicbrainzngs.auth(args.user, password)
-    musicbrainzngs.set_useragent("isrcsubmit-cdrdao", "0.1", "Mineo@Freenode")
+    musicbrainzngs.set_useragent("isrcsubmit-cdrdao", "0.2", "Mineo@Freenode")
 
     results = musicbrainzngs.get_releases_by_discid(
             _id, includes=["recordings", "isrcs",
