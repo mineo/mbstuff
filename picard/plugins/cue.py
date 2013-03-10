@@ -193,15 +193,20 @@ class CueSheet(CueSheetBase):
                         temp_lines[current_track] = []
                     temp_lines[current_track].append(line)
 
-        for k, v in temp_lines.items():
+        for k, text_metadata in temp_lines.items():
             fake_filename = u"%s #%s" % (filename, k)
             cuefile = CueSheetTrack(filename, self, k, metadata)
             self.tracks.append(cuefile)
             self.tagger.files[fake_filename] = cuefile
             self.tagger.load_queue.put((
-                partial(cuefile._load, v),
-                partial(cuefile._loading_finished,
-                    self.tagger._file_loaded),
+                partial(cuefile._load, text_metadata),
+                partial(
+                    cuefile._loading_finished,
+                    partial(
+                        self.tagger._file_loaded,
+                        None
+                        )
+                    ),
                 QtCore.Qt.LowEventPriority + 1))
         self.tagger.remove_files([self])
         return metadata
