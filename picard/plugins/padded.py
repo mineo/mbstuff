@@ -18,7 +18,7 @@ def add_padded_tn(tagger, metadata, release, track):
 
 @register_track_metadata_processor
 def add_padded_dn(tagger, metadata, release, track):
-    maxlength = len(metadata["totaltdiscs"])
+    maxlength = len(metadata["totaldiscs"])
     islength = len(metadata["discnumber"])
     metadata["~paddeddiscnumber"] = int(maxlength - islength) * "0" +\
                                       metadata["discnumber"]
