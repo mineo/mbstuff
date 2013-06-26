@@ -26,12 +26,14 @@ import subprocess
 from datetime import datetime
 from os import remove
 from sys import exit, version_info
+
 def main():
     parser = optparse.OptionParser()
     parser.add_option("-u", "--user", type=str, help="Username")
     parser.add_option("-p", "--password", type=str, help="Password")
-    parser.add_option("-d", "--device", type=str, default=discid.DEFAULT_DEVICE,
-            help="Device name, the default is %s" % discid.DEFAULT_DEVICE)
+    parser.add_option("-d", "--device", type=str,
+            default=discid.get_default_device(),
+            help="Device name, the default is %s" % discid.get_default_device())
     (args, options) = parser.parse_args()
 
     if not args.user:
