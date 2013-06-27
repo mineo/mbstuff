@@ -44,26 +44,21 @@ def main():
     else:
         password = args.password
 
-    _id = None
-    submission_url = None
-    with discid.DiscId() as disc:
-        disc.read(args.device)
-        _id = disc.id
-        submission_url = disc.submission_url
-
-    if _id is None:
+    try:
+        disc = discid.read(args.device)
+    except discid.DiscError:
         exit("No discid could be calculated")
 
     musicbrainzngs.auth(args.user, password)
     musicbrainzngs.set_useragent("isrcsubmit-cdrdao", "0.2", "Mineo@Freenode")
 
     results = musicbrainzngs.get_releases_by_discid(
-            _id, includes=["recordings", "isrcs",
+            disc.id, includes=["recordings", "isrcs",
             "artist-credits"])["disc"]["release-list"]
 
     if len(results) == 0:
         print "The disc is not in the database"
-        print "Please submit it with: %s" % submission_url
+        print "Please submit it with: %s" % disc.submission_url
         exit(1)
     elif len(results) > 1:
         print "This Disc ID is ambiguous:"
@@ -89,7 +84,7 @@ def main():
     for medium in release["medium-list"]:
         for mdisc in medium["disc-list"]:
             print mdisc
-            if mdisc["id"] == _id:
+            if mdisc["id"] == disc.id:
                 real_medium = medium
                 break
 
