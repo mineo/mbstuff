@@ -14,9 +14,10 @@ from picard.formats import register_format
 
 from functools import partial
 from PyQt4 import QtCore
+from picard import log
 from picard.file import File
 from picard.metadata import Metadata
-from picard.util import encode_filename
+from picard.util import encode_filename, thread
 
 
 class CueSheetBase(File):
@@ -129,7 +130,6 @@ class CueSheetTrack(CueSheetBase):
     def _load(self, lines):
         metadata = Metadata()
         metadata.copy(self.metadata)
-
         metadata.add("album", self.metadata.get("title"))
         del metadata["title"]
         for line in lines:
@@ -198,7 +198,7 @@ class CueSheet(CueSheetBase):
             cuefile = CueSheetTrack(filename, self, k, metadata)
             self.tracks.append(cuefile)
             self.tagger.files[fake_filename] = cuefile
-            self.tagger.load_queue.put((
+            thread.run_task(
                 partial(cuefile._load, text_metadata),
                 partial(
                     cuefile._loading_finished,
@@ -207,16 +207,16 @@ class CueSheet(CueSheetBase):
                         None
                         )
                     ),
-                QtCore.Qt.LowEventPriority + 1))
+                QtCore.Qt.LowEventPriority + 1)
         self.tagger.remove_files([self])
         return metadata
 
-    def _rename(self, old_filename, metadata, settings):
+    def _rename(self, old_filename, metadata):
         old_dir = os.path.dirname(self.filename)
         new_dir = os.path.dirname(encode_filename(
                                     self._make_filename(old_filename,
-                                                        metadata,
-                                                        settings)))
+                                                        metadata
+                                                        )))
         filename = os.path.basename(old_filename)
         new_filename = os.path.join(new_dir, filename)
         audiofile = " ".join(self.fileline.split()[0:-1]).strip('"')
@@ -241,7 +241,7 @@ class CueSheet(CueSheetBase):
                         encode_filename(new_wvc_filename))
         return new_filename
 
-    def _save(self, filename, metadata, settings):
+    def _save(self, filename, metadata):
         with open(self.filename + "", "w") as cuesheet:
             _write = partial(writeline, cuesheet)
             _write('PERFORMER "%s"' %
@@ -257,9 +257,9 @@ class CueSheet(CueSheetBase):
                 for line in track.metadata_to_kv():
                     _write(line, 4)
 
-    def _save_and_rename(self, old_filename, metadata, settings):
-        self._save(old_filename, metadata, settings)
-        return self._rename(self.filename, metadata, settings)
+    def _save_and_rename(self, old_filename, metadata):
+        self._save(old_filename, metadata)
+        return self._rename(self.filename, metadata)
 
 def writeline(_file, line, indent=0):
         _line = b" " * indent + line + b"\n"
