@@ -10,14 +10,14 @@ PLUGIN_API_VERSIONS = ["0.15"]
 from picard.metadata import register_track_metadata_processor
 
 @register_track_metadata_processor
-def add_padded_tn(tagger, metadata, release, track):
+def add_padded_tn(album, metadata, release, track):
     maxlength = len(metadata["totaltracks"])
     islength = len(metadata["tracknumber"])
     metadata["~paddedtracknumber"] = int(maxlength - islength) * "0" +\
                                       metadata["tracknumber"]
 
 @register_track_metadata_processor
-def add_padded_dn(tagger, metadata, release, track):
+def add_padded_dn(album, metadata, release, track):
     maxlength = len(metadata["totaldiscs"])
     islength = len(metadata["discnumber"])
     metadata["~paddeddiscnumber"] = int(maxlength - islength) * "0" +\
