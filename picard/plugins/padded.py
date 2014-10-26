@@ -2,7 +2,8 @@ PLUGIN_NAME = "Padded {disc,track}numbers"
 PLUGIN_AUTHOR = "Wieland Hoffmann"
 PLUGIN_DESCRIPTION = \
 """Adds padded disc- and tracknumbers so the length of all disc- and
-tracknumbers is the same"""
+tracknumbers is the same. They are stored in the `_paddedtracknumber` and
+`_paddeddiscnumber` tags."""
 
 PLUGIN_VERSION = "0.1"
 PLUGIN_API_VERSIONS = ["0.15"]
