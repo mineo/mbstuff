@@ -67,7 +67,7 @@ class IPreferSnakesOptionsPage(OptionsPage):
         try:
             compile_code(code)
         except SyntaxError as e:
-            raise OptionsCheckError("foo", unicode(e))
+            raise OptionsCheckError("Compilation failure", unicode(e))
 
     def check_code(self):
         self.ui.code_error.setStyleSheet("")
