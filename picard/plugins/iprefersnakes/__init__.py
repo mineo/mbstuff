@@ -18,12 +18,12 @@ _FUNCTION_NAME = "ips_func"
 _FUNCTION_TEMPLATE = \
 """
 from picard.config import setting
-def {name}(metadata):
+def {name}():
     {code}
 """
 
 
-def compile_code(code):
+def compile_code(code, parser=None):
     obj = compile(_FUNCTION_TEMPLATE.format(
             name=_FUNCTION_NAME,
             code=code.replace(
@@ -32,13 +32,16 @@ def compile_code(code):
         "<iprefersnakes_inline>",
         "exec")
     environment = {}
+    if parser is not None:
+        environment["metadata"] = parser.context
     exec(obj, environment)
     return environment[_FUNCTION_NAME]
 
 
 @register_script_function
 def iprefersnakes(parser):
-    return compile_code(unicode(config.setting["iprefersnakes_code"]))(parser.context)
+    return compile_code(unicode(config.setting["iprefersnakes_code"]),
+                        parser)()
 
 
 class IPreferSnakesOptionsPage(OptionsPage):
