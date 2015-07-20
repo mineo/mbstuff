@@ -57,7 +57,7 @@ class IPreferSnakesOptionsPage(OptionsPage):
         self.ui.code.textChanged.connect(self.check_code)
 
     def load(self):
-        self.ui.code.setText(self.config.setting["iprefersnakes_code"])
+        self.ui.code.setPlainText(self.config.setting["iprefersnakes_code"])
 
     def save(self):
         self.config.setting["iprefersnakes_code"] = unicode(self.ui.code.toPlainText())

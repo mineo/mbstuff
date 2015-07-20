@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTextEdit" name="code">
+    <widget class="QPlainTextEdit" name="code">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -27,9 +27,6 @@
        <family>Monospace</family>
        <pointsize>12</pointsize>
       </font>
-     </property>
-     <property name="lineWrapMode">
-      <enum>QTextEdit::NoWrap</enum>
      </property>
     </widget>
    </item>
