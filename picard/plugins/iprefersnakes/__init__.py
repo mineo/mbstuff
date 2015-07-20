@@ -1,9 +1,11 @@
 # coding: utf-8
 # Copyright © 2015 Wieland Hoffmann
 # License: MIT, see LICENSE for details
-PLUGIN_NAME = "bla"
+PLUGIN_NAME = "File naming via Python"
 PLUGIN_AUTHOR = "Wieland Hoffmann"
-PLUGIN_DESCRIPTION = ""
+PLUGIN_DESCRIPTION = """This plugins allows writing the file naming string in
+Python instead of tagger script. Replace the tagger script with
+$iprefersnakes() and write the Python code in the provided options page."""
 PLUGIN_VERSION = "0.1"
 PLUGIN_API_VERSIONS = ["1.3"]
 
