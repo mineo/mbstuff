@@ -49,7 +49,7 @@ def iprefersnakes(parser):
 class IPreferSnakesOptionsPage(OptionsPage):
     NAME = "iprefersnakes"
     TITLE = "I Prefer Snakes"
-    PARENT = "plugins"
+    PARENT = "filerenaming"
 
     options = [
         config.TextOption("setting", "iprefersnakes_code", "")
