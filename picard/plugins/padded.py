@@ -6,7 +6,7 @@ tracknumbers is the same. They are stored in the `_paddedtracknumber` and
 `_paddeddiscnumber` tags."""
 
 PLUGIN_VERSION = "0.1"
-PLUGIN_API_VERSIONS = ["0.15"]
+PLUGIN_API_VERSIONS = ["0.15", "2.0"]
 
 from picard.metadata import register_track_metadata_processor
 
