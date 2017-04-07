@@ -17,11 +17,10 @@ def transltag(tag):
     return tag
 
 
+@register_script_function
 def keep(parser, *keeptags):
     for tag in parser.context.keys():
         if (transltag(tag) not in keeptags and not tag.startswith("musicbrainz_")
             and not tag[0] == "~"):
             parser.context.pop(tag, None)
     return ""
-
-register_script_function(keep)
