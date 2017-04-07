@@ -3,11 +3,12 @@ PLUGIN_AUTHOR = 'Wieland Hoffmann'
 PLUGIN_DESCRIPTION = 'Adds an $add_to_collection function'
 PLUGIN_VERSION = '0.1'
 PLUGIN_API_VERSIONS = ['0.15.0',
- '0.15.1',
- '0.16.0',
- '1.0.0',
- '1.1.0',
- '1.2.0']
+                       '0.15.1',
+                       '0.16.0',
+                       '1.0.0',
+                       '1.1.0',
+                       '1.2.0',
+                       '2.0']
 from picard import collection
 from picard.script import register_script_function
 
