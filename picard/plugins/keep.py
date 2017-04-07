@@ -6,7 +6,7 @@ PLUGIN_DESCRIPTION = "Adds a $keep() function to delete all tags except the ones
 
 PLUGIN_VERSION = "1.1"
 PLUGIN_API_VERSIONS = ["0.15.0", "0.15.1", "0.16.0", "1.0.0", "1.1.0", "1.2.0",
-                       "1.3.0", ]
+                       "1.3.0", "2.0"]
 
 from picard.script import register_script_function
 
