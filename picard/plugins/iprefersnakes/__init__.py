@@ -1,5 +1,5 @@
 # coding: utf-8
-# Copyright © 2015 Wieland Hoffmann
+# Copyright © 2015, 2017 Wieland Hoffmann
 # License: MIT, see LICENSE for details
 PLUGIN_NAME = "File naming via Python"
 PLUGIN_AUTHOR = "Wieland Hoffmann"
@@ -7,7 +7,7 @@ PLUGIN_DESCRIPTION = """This plugins allows writing the file naming string in
 Python instead of tagger script. Replace the tagger script with
 $iprefersnakes() and write the Python code in the provided options page."""
 PLUGIN_VERSION = "0.1"
-PLUGIN_API_VERSIONS = ["1.3"]
+PLUGIN_API_VERSIONS = ["2.0"]
 
 
 from .options_iprefersnakes import Ui_IPreferSnakesOptionsPage
@@ -42,7 +42,7 @@ def compile_code(code, parser=None):
 
 @register_script_function
 def iprefersnakes(parser):
-    return compile_code(unicode(config.setting["iprefersnakes_code"]),
+    return compile_code(config.setting["iprefersnakes_code"],
                         parser)()
 
 
@@ -65,14 +65,14 @@ class IPreferSnakesOptionsPage(OptionsPage):
         self.ui.code.setPlainText(self.config.setting["iprefersnakes_code"])
 
     def save(self):
-        self.config.setting["iprefersnakes_code"] = unicode(self.ui.code.toPlainText())
+        self.config.setting["iprefersnakes_code"] = self.ui.code.toPlainText()
 
     def check(self):
-        code = unicode(self.ui.code.toPlainText())
+        code = self.ui.code.toPlainText()
         try:
             compile_code(code)
         except SyntaxError as e:
-            raise OptionsCheckError("Compilation failure", unicode(e))
+            raise OptionsCheckError("Compilation failure", e)
 
     def check_code(self):
         self.ui.code_error.setStyleSheet("")
@@ -84,7 +84,7 @@ class IPreferSnakesOptionsPage(OptionsPage):
             # We add some lines at the top, substract them again
             e.lineno = e.lineno - 3
             self.ui.code_error.setStyleSheet(self.STYLESHEET_ERROR)
-            self.ui.code_error.setText(unicode(e))
+            self.ui.code_error.setText(e)
 
 
 register_options_page(IPreferSnakesOptionsPage)
