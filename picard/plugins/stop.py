@@ -7,7 +7,7 @@ file naming string at a specific point. It's useful if you have several
 different file naming schemes with lots of nested `if`s. This does *only* work
 for file naming."""
 PLUGIN_VERSION = "0.1"
-PLUGIN_API_VERSIONS = ["0.15", "0.16"]
+PLUGIN_API_VERSIONS = ["0.15", "0.16", "2.0"]
 
 from picard.script import register_script_function, ScriptParser
 
@@ -28,5 +28,6 @@ file.ScriptParser = StoppingScriptParser
 
 def stop(parser, emptyarg):
     return STOP_MARKER
+
 
 register_script_function(stop)
