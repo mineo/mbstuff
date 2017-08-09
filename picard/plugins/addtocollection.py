@@ -21,7 +21,7 @@ def add_to_collection(parser, collectionid):
         thiscollection = collection.user_collections[collectionid]
     except KeyError:
         return ''
-    if unicode(mbid) in thiscollection.releases or mbid in thiscollection.pending:
+    if str(mbid) in thiscollection.releases or mbid in thiscollection.pending:
         return ''
     thiscollection.add_releases(set([mbid]), callback)
     return ''
